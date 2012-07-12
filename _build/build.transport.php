@@ -135,6 +135,21 @@ foreach ($settings as $setting) {
 $modx->log(modX::LOG_LEVEL_INFO,'Packaged in '.count($settings).' System Settings.'); flush();
 unset($settings,$setting,$attributes);
 
+/* load system events */
+$events = include_once $sources['data'].'transport.events.php';
+if (!is_array($events)) $modx->log(modX::LOG_LEVEL_FATAL,'No events returned.');
+$attributes= array(
+    xPDOTransport::UNIQUE_KEY => 'name',
+    xPDOTransport::PRESERVE_KEYS => true,
+    xPDOTransport::UPDATE_OBJECT => false,
+);
+foreach ($events as $event) {
+    $vehicle = $builder->createVehicle($event,$attributes);
+    $builder->putVehicle($vehicle);
+}
+$modx->log(modX::LOG_LEVEL_INFO,'Packaged in '.count($events).' System Evemts.'); flush();
+unset($events,$event,$attributes);
+
 /* now pack in the license file, readme and setup options */
 $builder->setPackageAttributes(array(
     'license' => file_get_contents($sources['docs'] . 'license.txt'),

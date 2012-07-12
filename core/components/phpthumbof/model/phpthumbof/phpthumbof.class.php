@@ -200,6 +200,9 @@ class ptThumbnail {
      * Startup the phpThumb service. Must run setInput and setOptions first.
      */
     public function initializeService() {
+		$this->modx->invokeEvent('OnPhpThumbOfInit', array(
+			'ptThumbnail' => $this
+		));
         $this->phpThumb->config = array_merge($this->phpThumb->config,$this->options);
         $this->phpThumb->initialize();
         $this->phpThumb->setParameter('config_cache_directory',$this->config['cachePath']);

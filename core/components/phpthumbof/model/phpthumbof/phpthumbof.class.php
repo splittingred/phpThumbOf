@@ -219,8 +219,6 @@ class ptThumbnail {
         /* get absolute url of image */
         if (strpos($input,'/') != 0 && strpos($input,'http') != 0) {
             $input = $this->modx->context->getOption('base_url').$input;
-        } else {
-            $input = urldecode($input);
         }
 
         $hasQuery = strpos($input,'?');

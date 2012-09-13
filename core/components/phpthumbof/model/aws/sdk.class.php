@@ -133,7 +133,7 @@ define('CFRUNTIME_USERAGENT', CFRUNTIME_NAME . '/' . CFRUNTIME_VERSION . ' PHP/'
  * Class: CFRuntime
  * 	Container for all shared methods. This is not intended to be instantiated directly, but is extended by the service-specific classes.
  */
-if(class_exists('CFRuntime_Exception') != true) {
+if(class_exists('CFRuntime') != true) {
 	class CFRuntime
 {
 	/*%******************************************************************************************%*/

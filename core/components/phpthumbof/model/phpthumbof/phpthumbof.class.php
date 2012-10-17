@@ -289,6 +289,7 @@ class ptThumbnail {
             $inputSanitized = str_replace(array(':','/'),'_',$this->input);
             $this->cacheFilename = md5($inputSanitized);
             $this->cacheFilename .= '.'.md5(serialize($this->options));
+            $this->cacheFilename .= '.'.filemtime(rtrim($this->modx->getOption('base_path',null,MODX_BASE_PATH),'/').$this->input);
             $this->cacheFilename .= '.' . (!empty($this->options['f']) ? $this->options['f'] : 'png');
         } else { /* or attempt to preserve the filename */
             $inputSanitized = str_replace(array('http://','https://','ftp://','sftp://'),'',$this->input);
@@ -304,6 +305,7 @@ class ptThumbnail {
                     }
                 }
                 $this->cacheFilename .= '.'.md5(serialize($this->options)).$this->modx->resource->get('id');
+                $this->cacheFilename .= '.'.filemtime(rtrim($this->modx->getOption('base_path',null,MODX_BASE_PATH),'/').$this->input);
                 $this->cacheFilename .= '.' . (!empty($this->options['f']) ? $this->options['f'] : 'png');
             }
         }

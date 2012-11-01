@@ -35,7 +35,7 @@ if (!$modx->loadClass('modPhpThumb',$modx->getOption('core_path').'model/phpthum
     $modx->log(modX::LOG_LEVEL_ERROR,'[phpThumbOf] Could not load modPhpThumb class.');
     return '';
 }
-if (empty($input)) {
+if (empty($input) || strpos($input, '[[') !== false) {
     $modx->log(modX::LOG_LEVEL_DEBUG,'[phpThumbOf] Empty image path passed, aborting.');
     return '';
 }

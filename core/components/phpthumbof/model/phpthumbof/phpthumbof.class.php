@@ -291,19 +291,17 @@ class ptThumbnail {
             $this->cacheFilename .= '.'.md5(serialize($this->options));
             $this->cacheFilename .= '.' . (!empty($this->options['f']) ? $this->options['f'] : 'png');
         } else { /* or attempt to preserve the filename */
-            $inputSanitized = str_replace(array('http://','https://','ftp://','sftp://'),'',$this->input);
-            $inputSanitized = str_replace(array(':'),'_',$inputSanitized);
+			$inputSanitized = str_replace( array('http://','https://'), '', $this->input );
+			$inputSanitized = str_replace(':', '_', $inputSanitized);
             $this->cacheFilename = basename($inputSanitized);
-            if ($this->modx->context->getOption('phpthumbof.postfix_property_hash',true,$this->config)) {
+            if ($this->modx->context->getOption('phpthumbof.postfix_property_hash', true, $this->config)) {
                 if (!empty($this->options['f'])) { /* get rid of the middle extension and put it at the end */
-                    $length = strlen($this->cacheFilename);
-                    $extLength = strlen($this->options['f']);
-                    $cut = $length-$extLength-1;
+                    $cut = strlen($this->cacheFilename) - strlen($this->options['f']) - 1;
                     if (strlen($this->cacheFilename) > $cut) {
-                        $this->cacheFilename = substr($this->cacheFilename,0,$cut);
+                        $this->cacheFilename = substr($this->cacheFilename, 0, $cut);
                     }
                 }
-                $this->cacheFilename .= '.' . md5( serialize($this->options) . pathinfo($inputSanitized, PATHINFO_DIRNAME) );
+				$this->cacheFilename .= '.' . md5( serialize($this->options) . pathinfo($inputSanitized, PATHINFO_DIRNAME) );
                 $this->cacheFilename .= '.' . (!empty($this->options['f']) ? $this->options['f'] : 'png');
             }
         }
@@ -345,7 +343,7 @@ class ptThumbnail {
     public function render() {
         $this->getCacheFilename();
         $this->getCacheUrl();
-        $this->cleanCache();
+        // $this->cleanCache();
         $this->phpThumbOf->startDebug();
 
         /* if using s3, check for file there */

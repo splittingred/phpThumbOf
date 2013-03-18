@@ -40,7 +40,7 @@ switch ($modx->event->name) {
         $cacheDir = $assetsPath.'cache/';
 
         /* clear local cache */
-        if (!empty($cacheDir)) {
+        if (is_dir($cacheDir) && !empty($cacheDir)) {
             /** @var DirectoryIterator $file */
             foreach (new DirectoryIterator($cacheDir) as $file) {
                 if (!$file->isFile()) continue;

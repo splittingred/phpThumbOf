@@ -1,28 +1,74 @@
 <?php
+
+require_once(dirname(__FILE__).'/utilities/credentials.class.php');
+
 /**
  * Handles S3 operations
  */
 class modAws {
     public $s3 = false;
     public $bucket = false;
+    public $aws_key = null;
+    public $aws_secret = null;
     
     function __construct(modX &$modx,array $config = array()) {
         $this->modx =& $modx;
-        $this->config = array_merge(array(
-        ),$config);
+        $this->config = array_merge(array(),$config);
 
-        if (!defined('AWS_KEY')) {
-            define('AWS_KEY',$modx->getOption('phpthumbof.s3_key',$config,''));
-            define('AWS_SECRET_KEY',$modx->getOption('phpthumbof.s3_secret_key',$config,''));
-            /*
-            define('AWS_ACCOUNT_ID',$modx->getOption('aws.account_id',$config,''));
-            define('AWS_CANONICAL_ID',$modx->getOption('aws.canonical_id',$config,''));
-            define('AWS_CANONICAL_NAME',$modx->getOption('aws.canonical_name',$config,''));
-            define('AWS_MFA_SERIAL',$modx->getOption('aws.mfa_serial',$config,''));
-            define('AWS_CLOUDFRONT_KEYPAIR_ID',$modx->getOption('aws.cloudfront_keypair_id',$config,''));
-            define('AWS_CLOUDFRONT_PRIVATE_KEY_PEM',$modx->getOption('aws.cloudfront_private_key_pem',$config,''));
-            define('AWS_ENABLE_EXTENSIONS', 'false');*/
+        // Set AWS key
+        if (is_null($this->aws_key)) {
+            $this->aws_key = $modx->getOption('phpthumbof.s3_key',$config,'');
         }
+
+        // Set AWS secret
+        if (is_null($this->aws_secret)) {
+            $this->aws_secret = $modx->getOption('phpthumbof.s3_secret_key',$config,'');
+        }
+
+        // NOTE: These can be set later, not needed now ....
+        // $modx->getOption('aws.account_id',$config,''));
+        // $modx->getOption('aws.canonical_id',$config,''));
+        // $modx->getOption('aws.canonical_name',$config,''));
+        // $modx->getOption('aws.mfa_serial',$config,''));
+        // $modx->getOption('aws.cloudfront_keypair_id',$config,''));
+        // $modx->getOption('aws.cloudfront_private_key_pem',$config,''));
+        // $modx->getOption('aws.enable_extensions',$config,''));
+
+        CFCredentials::set(array(
+
+            // Credentials for the development environment.
+            'development' => array(
+
+                // Amazon Web Services Key. Found in the AWS Security Credentials. You can also pass
+                // this value as the first parameter to a service constructor.
+                'key' => $this->aws_key,
+
+                // Amazon Web Services Secret Key. Found in the AWS Security Credentials. You can also
+                // pass this value as the second parameter to a service constructor.
+                'secret' => $this->aws_secret,
+
+                // This option allows you to configure a preferred storage type to use for caching by
+                // default. This can be changed later using the set_cache_config() method.
+                //
+                // Valid values are: `apc`, `xcache`, or a file system path such as `./cache` or
+                // `/tmp/cache/`.
+                'default_cache_config' => '',
+
+                // Determines which Cerificate Authority file to use.
+                //
+                // A value of boolean `false` will use the Certificate Authority file available on the
+                // system. A value of boolean `true` will use the Certificate Authority provided by the
+                // SDK. Passing a file system path to a Certificate Authority file (chmodded to `0755`)
+                // will use that.
+                //
+                // Leave this set to `false` if you're not sure.
+                'certificate_authority' => false
+            ),
+
+            // Specify a default credential set to use if there are more than one.
+            '@default' => 'development'
+        ));
+
         include dirname(__FILE__).DIRECTORY_SEPARATOR.'sdk.class.php';
 
         $this->getS3();

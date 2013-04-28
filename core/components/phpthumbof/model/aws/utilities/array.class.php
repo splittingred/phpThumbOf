@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2010 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2010-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -14,75 +14,82 @@
  * permissions and limitations under the License.
  */
 
-/**
- * File: CFArray
- * 	Wrapper for ArrayObject.
- *
- * Version:
- * 	2010.10.03
- *
- * License and Copyright:
- * 	See the included NOTICE.md file for more information.
- *
- * See Also:
- * 	[PHP Developer Center](http://aws.amazon.com/php/)
- * 	[ArrayObject](http://php.net/ArrayObject)
- */
-
 
 /*%******************************************************************************************%*/
 // CLASS
 
 /**
- * Class: CFArray
- * 	Wrapper for ArrayObject.
+ * The <CFArray> object extends PHP's built-in <php:ArrayObject> object by providing convenience methods for
+ * rapidly manipulating array data. Specifically, the `CFArray` object is intended for working with
+ * <CFResponse> and <CFSimpleXML> objects that are returned by AWS services.
+ *
+ * @version 2012.01.17
+ * @license See the included NOTICE.md file for more information.
+ * @copyright See the included NOTICE.md file for more information.
+ * @link http://aws.amazon.com/php/ PHP Developer Center
+ * @link http://php.net/ArrayObject ArrayObject
  */
 class CFArray extends ArrayObject
 {
 	/**
-	 * Method: __construct()
-	 * 	The constructor.
+	 * Constructs a new instance of <CFArray>.
 	 *
-	 * Access:
-	 * 	public
-	 *
-	 * Parameters:
-	 * 	$input - _mixed_ (Required) The input parameter accepts an array or an Object.
-	 * 	$flags - _int_ (Optional) Flags to control the behavior of the ArrayObject object. Defaults to `ArrayObject::STD_PROP_LIST`.
-	 * 	$iterator_class - _string_ (Optional) Specify the class that will be used for iteration of the `ArrayObject` object. `ArrayIterator` is the default class used.
-	 *
-	 * Returns:
-	 * 	_mixed_ Either an array of matches, or a single <CFSimpleXML> element.
+	 * @param mixed $input (Optional) The input parameter accepts an array or an Object. The default value is an empty array.
+	 * @param integer $flags (Optional) Flags to control the behavior of the ArrayObject object. Defaults to <STD_PROP_LIST>.
+	 * @param string $iterator_class (Optional) Specify the class that will be used for iteration of the <php:ArrayObject> object. <php:ArrayIterator> is the default class used.
+	 * @return mixed Either an array of matches, or a single <CFSimpleXML> element.
 	 */
-	public function __construct($input, $flags = self::STD_PROP_LIST, $iterator_class = 'ArrayIterator')
+	public function __construct($input = array(), $flags = self::STD_PROP_LIST, $iterator_class = 'ArrayIterator')
 	{
-		return parent::__construct($input, $flags, $iterator_class);
+		// Provide a default value
+		$input = $input ? $input : array();
+
+		try {
+			return parent::__construct($input, $flags, $iterator_class);
+		}
+		catch (InvalidArgumentException $e)
+		{
+			throw new CFArray_Exception($e->getMessage());
+		}
 	}
 
 	/**
-	 * Method: __toString()
-	 * 	Handles how the object is rendered when cast as a string.
+	 * Alternate approach to constructing a new instance. Supports chaining.
 	 *
-	 * Access:
-	 * 	public
+	 * @param mixed $input (Optional) The input parameter accepts an array or an Object. The default value is an empty array.
+	 * @param integer $flags (Optional) Flags to control the behavior of the ArrayObject object. Defaults to <STD_PROP_LIST>.
+	 * @param string $iterator_class (Optional) Specify the class that will be used for iteration of the <php:ArrayObject> object. <php:ArrayIterator> is the default class used.
+	 * @return mixed Either an array of matches, or a single <CFSimpleXML> element.
+	 */
+	public static function init($input = array(), $flags = self::STD_PROP_LIST, $iterator_class = 'ArrayIterator')
+	{
+		if (version_compare(PHP_VERSION, '5.3.0', '<'))
+		{
+			throw new Exception('PHP 5.3 or newer is required to instantiate a new class with CLASS::init().');
+		}
+
+		$self = get_called_class();
+		return new $self($input, $flags, $iterator_class);
+	}
+
+	/**
+	 * Handles how the object is rendered when cast as a string.
 	 *
-	 * Returns:
-	 * 	_string_ Array
+	 * @return string The word "Array".
 	 */
 	public function __toString()
 	{
 		return 'Array';
 	}
 
+
+	/*%******************************************************************************************%*/
+	// REFORMATTING
+
 	/**
-	 * Method: map_integer()
-	 * 	Maps each element in the CFArray object as an integer.
+	 * Maps each element in the <CFArray> object as an integer.
 	 *
-	 * Access:
-	 * 	public
-	 *
-	 * Returns:
-	 * 	_array_ The contents of the CFArray object mapped as integers.
+	 * @return array The contents of the <CFArray> object mapped as integers.
 	 */
 	public function map_integer()
 	{
@@ -90,21 +97,15 @@ class CFArray extends ArrayObject
 	}
 
 	/**
-	 * Method: map_string()
-	 * 	Maps each element in the CFArray object as a string.
+	 * Maps each element in the CFArray object as a string.
 	 *
-	 * Access:
-	 * 	public
-	 *
-	 * Parameters:
-	 * 	$pcre - _string_ (Optional) A Perl-Compatible Regular Expression (PCRE) to filter the names against.
-	 *
-	 * Returns:
-	 * 	_array_ The contents of the CFArray object mapped as strings. If there are no results, the method will return an empty array.
+	 * @param string $pcre (Optional) A Perl-Compatible Regular Expression (PCRE) to filter the names against.
+	 * @return array The contents of the <CFArray> object mapped as strings. If there are no results, the method will return an empty array.
 	 */
 	public function map_string($pcre = null)
 	{
 		$list = array_map('strval', $this->getArrayCopy());
+		$dlist = array();
 
 		if ($pcre)
 		{
@@ -119,15 +120,14 @@ class CFArray extends ArrayObject
 		return $list;
 	}
 
+
+	/*%******************************************************************************************%*/
+	// CONFIRMATION
+
 	/**
-	 * Method: areOK()
-	 * 	Verifies that _all_ responses were successful. A single failed request will cause <areOK()> to return false. Equivalent to <CFResponse::isOK()>, except it applies to all responses.
+	 * Verifies that _all_ responses were successful. A single failed request will cause <areOK()> to return false. Equivalent to <CFResponse::isOK()>, except it applies to all responses.
 	 *
-	 * Access:
-	 * 	public
-	 *
-	 * Returns:
-	 * 	_boolean_ Whether _all_ requests were successful or not.
+	 * @return boolean Whether _all_ requests were successful or not.
 	 */
 	public function areOK()
 	{
@@ -145,86 +145,81 @@ class CFArray extends ArrayObject
 		return (array_search(false, $dlist, true) !== false) ? false : true;
 	}
 
+
+	/*%******************************************************************************************%*/
+	// ITERATING AND EXECUTING
+
 	/**
-	 * Method: each()
-	 * 	Iterates over a <CFArray> object, and executes a function for each matched element.
+	 * Iterates over a <CFArray> object, and executes a function for each matched element.
 	 *
-	 * Access:
-	 * 	public
+	 * The callback function takes three parameters: <ul>
+	 * 	<li><code>$item</code> - <code>mixed</code> - Optional - The individual node in the array.</li>
+	 * 	<li><code>$key</code> - <code>mixed</code> - Optional - The key for the array node.</li>
+	 * 	<li><code>$bind</code> - <code>mixed</code> - Optional - The variable that was passed into the $bind parameter.</li></ul>
 	 *
-	 * Parameters:
-	 * 	$callback - _string_ (Required) The callback function to execute. PHP 5.3 or newer can use an anonymous function.
-	 * 	$bind - _mixed_ (Optional) A variable from the calling scope to pass-by-reference into the local scope of the callback function.
-	 *
-	 * Returns:
-	 * 	_CFArray_ The original <CFArray> object.
+	 * @param string|function $callback (Required) The callback function to execute. PHP 5.3 or newer can use an anonymous function.
+	 * @param mixed $bind (Optional) A variable from the calling scope to pass-by-reference into the local scope of the callback function.
+	 * @return CFArray The original <CFArray> object.
 	 */
 	public function each($callback, &$bind = null)
 	{
 		$items = $this->getArrayCopy();
-		$max = count($items);
 
-		for ($i = 0; $i < $max; $i++)
+		foreach ($items as $key => &$item)
 		{
-			$callback($items[$i], $i, $bind);
+			$callback($item, $key, $bind);
 		}
 
 		return $this;
 	}
 
 	/**
-	 * Method: map()
-	 * 	Passes each element in the current <CFArray> object through a function, and produces a new <CFArray> object containing the return values.
+	 * Passes each element in the current <CFArray> object through a function, and produces a new <CFArray> object containing the return values.
 	 *
-	 * Access:
-	 * 	public
+	 * The callback function takes three parameters: <ul>
+	 * 	<li><code>$item</code> - <code>mixed</code> - Optional - The individual node in the array.</li>
+	 * 	<li><code>$key</code> - <code>mixed</code> - Optional - The key for the array node.</li>
+	 * 	<li><code>$bind</code> - <code>mixed</code> - Optional - The variable that was passed into the $bind parameter.</li></ul>
 	 *
-	 * Parameters:
-	 * 	$callback - _string_ (Required) The callback function to execute. PHP 5.3 or newer can use an anonymous function.
-	 * 	$bind - _mixed_ (Optional) A variable from the calling scope to pass-by-reference into the local scope of the callback function.
-	 *
-	 * Returns:
-	 * 	_CFArray_ A new <CFArray> object containing the return values.
+	 * @param string|function $callback (Required) The callback function to execute. PHP 5.3 or newer can use an anonymous function.
+	 * @param mixed $bind (Optional) A variable from the calling scope to pass-by-reference into the local scope of the callback function.
+	 * @return CFArray A new <CFArray> object containing the return values.
 	 */
 	public function map($callback, &$bind = null)
 	{
 		$items = $this->getArrayCopy();
-		$max = count($items);
 		$collect = array();
 
-		for ($i = 0; $i < $max; $i++)
+		foreach ($items as $key => &$item)
 		{
-			$collect[] = $callback($items[$i], $i, $bind);
+			$collect[] = $callback($item, $key, $bind);
 		}
 
 		return new CFArray($collect);
 	}
 
 	/**
-	 * Method: reduce()
-	 * 	Reduces the list of nodes by passing each value in the current <CFArray> object through a function. The node will be removed if the function returns `false`.
+	 * Filters the list of nodes by passing each value in the current <CFArray> object through a function. The node will be removed if the function returns `false`.
 	 *
-	 * Access:
-	 * 	public
+	 * The callback function takes three parameters: <ul>
+	 * 	<li><code>$item</code> - <code>mixed</code> - Optional - The individual node in the array.</li>
+	 * 	<li><code>$key</code> - <code>mixed</code> - Optional - The key for the array node.</li>
+	 * 	<li><code>$bind</code> - <code>mixed</code> - Optional - The variable that was passed into the $bind parameter.</li></ul>
 	 *
-	 * Parameters:
-	 * 	$callback - _string_ (Required) The callback function to execute. PHP 5.3 or newer can use an anonymous function.
-	 * 	$bind - _mixed_ (Optional) A variable from the calling scope to pass-by-reference into the local scope of the callback function.
-	 *
-	 * Returns:
-	 * 	_CFArray_ A new <CFArray> object containing the return values.
+	 * @param string|function $callback (Required) The callback function to execute. PHP 5.3 or newer can use an anonymous function.
+	 * @param mixed $bind (Optional) A variable from the calling scope to pass-by-reference into the local scope of the callback function.
+	 * @return CFArray A new <CFArray> object containing the return values.
 	 */
-	public function reduce($callback, &$bind = null)
+	public function filter($callback, &$bind = null)
 	{
 		$items = $this->getArrayCopy();
-		$max = count($items);
 		$collect = array();
 
-		for ($i = 0; $i < $max; $i++)
+		foreach ($items as $key => &$item)
 		{
-			if ($callback($items[$i], $i, $bind) !== false)
+			if ($callback($item, $key, $bind) !== false)
 			{
-				$collect[] = $items[$i];
+				$collect[] = $item;
 			}
 		}
 
@@ -232,14 +227,25 @@ class CFArray extends ArrayObject
 	}
 
 	/**
-	 * Method: first()
-	 * 	Gets the first result in the array.
+	 * Alias for <filter()>. This functionality was incorrectly named _reduce_ in earlier versions of the SDK.
 	 *
-	 * Access:
-	 * 	public
+	 * @param string|function $callback (Required) The callback function to execute. PHP 5.3 or newer can use an anonymous function.
+	 * @param mixed $bind (Optional) A variable from the calling scope to pass-by-reference into the local scope of the callback function.
+	 * @return CFArray A new <CFArray> object containing the return values.
+	 */
+	public function reduce($callback, &$bind = null)
+	{
+		return $this->filter($callback, $bind);
+	}
+
+
+	/*%******************************************************************************************%*/
+	// TRAVERSAL
+
+	/**
+	 * Gets the first result in the array.
 	 *
-	 * Returns:
-	 * 	_mixed_ The first result in the <CFArray> object. Returns `false` if there are no items in the array.
+	 * @return mixed The first result in the <CFArray> object. Returns `false` if there are no items in the array.
 	 */
 	public function first()
 	{
@@ -248,19 +254,59 @@ class CFArray extends ArrayObject
 	}
 
 	/**
-	 * Method: last()
-	 * 	Gets the last result in the array.
+	 * Gets the last result in the array.
 	 *
-	 * Access:
-	 * 	public
-	 *
-	 * Returns:
-	 * 	_mixed_ The last result in the <CFArray> object. Returns `false` if there are no items in the array.
+	 * @return mixed The last result in the <CFArray> object. Returns `false` if there are no items in the array.
 	 */
 	public function last()
 	{
 		$items = $this->getArrayCopy();
-		$last = count($items) - 1;
-		return count($items) ? $items[$last] : false;
+		return count($items) ? end($items) : false;
+	}
+
+	/**
+	 * Removes all `null` values from an array.
+	 *
+	 * @return CFArray A new <CFArray> object containing the non-null values.
+	 */
+	public function compress()
+	{
+		return new CFArray(array_filter($this->getArrayCopy()));
+	}
+
+	/**
+	 * Reindexes the array, starting from zero.
+	 *
+	 * @return CFArray A new <CFArray> object with indexes starting at zero.
+	 */
+	public function reindex()
+	{
+		return new CFArray(array_values($this->getArrayCopy()));
+	}
+
+
+	/*%******************************************************************************************%*/
+	// ALTERNATE FORMATS
+
+	/**
+	 * Gets the current XML node as a JSON string.
+	 *
+	 * @return string The current XML node as a JSON string.
+	 */
+	public function to_json()
+	{
+		return json_encode($this->getArrayCopy());
+	}
+
+	/**
+	 * Gets the current XML node as a YAML string.
+	 *
+	 * @return string The current XML node as a YAML string.
+	 */
+	public function to_yaml()
+	{
+		return sfYaml::dump($this->getArrayCopy(), 5);
 	}
 }
+
+class CFArray_Exception extends Exception {}

@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2010 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2010-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -14,26 +14,17 @@
  * permissions and limitations under the License.
  */
 
-/**
- * File: CFResponse
- * 	Wrapper for ResponseCore.
- *
- * Version:
- * 	2010.10.11
- *
- * License and Copyright:
- * 	See the included NOTICE.md file for more information.
- *
- * See Also:
- * 	[PHP Developer Center](http://aws.amazon.com/php/)
- */
-
 
 /*%******************************************************************************************%*/
 // CLASS
 
 /**
- * Class: CFResponse
- * 	Wrapper for ResponseCore.
+ * Wraps the underlying `ResponseCore` class with some AWS-specific customizations. Response
+ * bodies are typically represented as CFSimpleXML objects.
+ *
+ * @version 2010.10.11
+ * @license See the included NOTICE.md file for more information.
+ * @copyright See the included NOTICE.md file for more information.
+ * @link http://aws.amazon.com/php/ PHP Developer Center
  */
 class CFResponse extends ResponseCore {}

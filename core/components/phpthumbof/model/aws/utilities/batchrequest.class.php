@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2010 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2010-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -14,27 +14,12 @@
  * permissions and limitations under the License.
  */
 
-/**
- * File: CFBatchRequest
- * 	Handle batch request queues.
- *
- * Version:
- * 	2010.08.09
- *
- * License and Copyright:
- * 	See the included NOTICE.md file for more information.
- *
- * See Also:
- * 	[PHP Developer Center](http://aws.amazon.com/php/)
- */
-
 
 /*%******************************************************************************************%*/
 // EXCEPTIONS
 
 /**
- * Exception: CFBatchRequest
- * 	Default CFBatchRequest Exception.
+ * Default CFBatchRequest Exception.
  */
 class CFBatchRequest_Exception extends Exception {}
 
@@ -43,59 +28,77 @@ class CFBatchRequest_Exception extends Exception {}
 // CLASS
 
 /**
- * Class: CFBatchRequest
- * 	Handle batch request queues.
+ * Simplifies the flow involved with managing and executing a batch request queue. Batch requesting is the
+ * ability to queue up a series of requests and execute them all in parallel. This allows for faster
+ * application performance when a lot of requests are involved.
+ *
+ * @version 2011.12.02
+ * @license See the included NOTICE.md file for more information.
+ * @copyright See the included NOTICE.md file for more information.
+ * @link http://aws.amazon.com/php/ PHP Developer Center
  */
 class CFBatchRequest extends CFRuntime
 {
 	/**
-	 * Property: queue
-	 * 	Stores the cURL handles that are to be processed.
+	 * Stores the cURL handles that are to be processed.
 	 */
 	public $queue;
 
 	/**
-	 * Property: limit
-	 * 	Stores the size of the request window.
+	 * Stores the size of the request window.
 	 */
 	public $limit;
+
+	/**
+	 * The proxy to use for connecting.
+	 */
+	public $proxy = null;
+
+	/**
+	 * The helpers to use when connecting.
+	 */
+	public $helpers = null;
+
+	/**
+	 * The active credential set.
+	 */
+	public $credentials;
 
 
 	/*%******************************************************************************************%*/
 	// CONSTRUCTOR
 
 	/**
-	 * Method: __construct()
-	 * 	The constructor.
+	 * Constructs a new instance of this class.
 	 *
-	 * Access:
-	 * 	public
-	 *
-	 * Parameters:
-	 * 	$limit - _integer_ (Optional) The size of the request window. Defaults to unlimited.
-	 *
-	 * Returns:
-	 * 	boolean FALSE if no valid values are set, otherwise TRUE.
+	 * @param integer $limit (Optional) The size of the request window. Defaults to unlimited.
+	 * @return boolean `false` if no valid values are set, otherwise `true`.
 	 */
 	public function __construct($limit = null)
 	{
 		$this->queue = array();
 		$this->limit = $limit ? $limit : -1;
+		$this->credentials = new CFCredential(array());
 		return $this;
 	}
 
 	/**
-	 * Method: add()
-	 * 	Adds a new cURL handle to the queue.
+	 * Sets the AWS credentials to use for the batch request.
 	 *
-	 * Access:
-	 * 	public
+	 * @param CFCredential $credentials (Required) The credentials to use for signing and making requests.
+	 * @return $this A reference to the current instance.
+	 */
+	public function use_credentials(CFCredential $credentials)
+	{
+		$this->credentials = $credentials;
+		return $this;
+	}
+
+	/**
+	 * Adds a new cURL handle to the request queue.
 	 *
-	 * Parameters:
-	 * 	$handle - _resource_ (Required) A cURL resource to add to the queue.
-	 *
-	 * Returns:
-	 * 	`$this`
+	 * @param resource $handle (Required) A cURL resource to add to the queue.
+	 * @return $this A reference to the current instance.
 	 */
 	public function add($handle)
 	{
@@ -104,18 +107,14 @@ class CFBatchRequest extends CFRuntime
 	}
 
 	/**
-	 * Method: send()
-	 * 	Sends the batch request queue.
+	 * Executes the batch request queue.
 	 *
-	 * Access:
-	 * 	public
-	 *
-	 * Returns:
-	 * 	_array_ An indexed array of <CFResponse> objects.
+	 * @param array $opt (DO NOT USE) Enabled for compatibility with the method this overrides, although any values passed will be ignored.
+	 * @return array An indexed array of <CFResponse> objects.
 	 */
 	public function send($opt = null)
 	{
-		$http = new $this->request_class();
+		$http = new $this->request_class(null, $this->proxy, null, $this->credentials);
 
 		// Make the request
 		$response = $http->send_multi_request($this->queue, array(

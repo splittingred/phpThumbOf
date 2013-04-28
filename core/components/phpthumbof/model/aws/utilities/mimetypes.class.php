@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2010 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2010-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -14,32 +14,22 @@
  * permissions and limitations under the License.
  */
 
-/**
- * File: CFMimeTypes
- * 	Handles mime-type lookups.
- *
- * Version:
- * 	2010.07.20
- *
- * License and Copyright:
- * 	See the included NOTICE.md file for more information.
- *
- * See Also:
- * 	[PHP Developer Center](http://aws.amazon.com/php/)
- */
-
 
 /*%******************************************************************************************%*/
 // CLASS
 
 /**
- * Class: CFMimeTypes
+ * Simplifies the process of looking up the content-types for a variety of file extensions.
+ *
+ * @version 2010.07.20
+ * @license See the included NOTICE.md file for more information.
+ * @copyright See the included NOTICE.md file for more information.
+ * @link http://aws.amazon.com/php/ PHP Developer Center
  */
 class CFMimeTypes
 {
 	/**
-	 * Property: mime_types
-	 * 	Map of the extension-to-mime-types that we support.
+	 * Map of the extension-to-mime-types that we support.
 	 */
 	public static $mime_types = array(
 		'3gp' => 'video/3gpp',
@@ -221,20 +211,14 @@ class CFMimeTypes
 	);
 
 	/**
-	 * Method: get_mimetype()
-	 * 	Attempt to match the file extension to a known mime-type.
+	 * Attempt to match the file extension to a known mime-type.
 	 *
-	 * Access:
-	 * 	public
-	 *
-	 * Parameters:
-	 * 	$ext - _string_ (Required) The file extension to attempt to map.
-	 *
-	 * Returns:
-	 * 	_string_ The mime-type to use for the file extension.
+	 * @param string $ext (Required) The file extension to attempt to map.
+	 * @return string The mime-type to use for the file extension.
 	 */
 	public static function get_mimetype($ext)
 	{
-		return (isset(self::$mime_types[$ext]) ? self::$mime_types[$ext] : 'application/octet-stream');
+		$ext = strtolower($ext);  // Make sure the passed in extension is lowercase
+		return isset(self::$mime_types[$ext]) ? self::$mime_types[$ext] : 'application/octet-stream';
 	}
 }

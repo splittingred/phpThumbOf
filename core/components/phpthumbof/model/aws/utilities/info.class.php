@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2010 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * Copyright 2010-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License").
  * You may not use this file except in compliance with the License.
@@ -14,39 +14,24 @@
  * permissions and limitations under the License.
  */
 
-/**
- * File: CFInfo
- * 	Provides information about the SDK.
- *
- * Version:
- * 	2010.10.01
- *
- * License and Copyright:
- * 	See the included NOTICE.md file for more information.
- *
- * See Also:
- * 	[PHP Developer Center](http://aws.amazon.com/php/)
- */
-
 
 /*%******************************************************************************************%*/
 // CLASS
 
 /**
- * Class: CFInfo
- * 	Provides information about the SDK.
+ * Contains a series of methods that provide information about the SDK.
+ *
+ * @version 2010.10.01
+ * @license See the included NOTICE.md file for more information.
+ * @copyright See the included NOTICE.md file for more information.
+ * @link http://aws.amazon.com/php/ PHP Developer Center
  */
 class CFInfo
 {
 	/**
-	 * Method: api_support()
-	 * 	Gets information about the web service APIs that the SDK supports.
+	 * Gets information about the web service APIs that the SDK supports.
 	 *
-	 * Access:
-	 * 	public
-	 *
-	 * Returns:
-	 * 	_array_ An associative array containing service classes and API versions.
+	 * @return array An associative array containing service classes and API versions.
 	 */
 	public static function api_support()
 	{
